@@ -34,14 +34,17 @@ namespace TaskManager.Tests
                 .Build()
                 .WithExistingProcess();
 
+            var existing = taskManager.List().Single();
             var processToAdd = new Process(1, 2);
 
             taskManager.Invoking(t => t.Add(processToAdd))
                 .Should()
-                .ThrowExactly<MaxCapacityOfProcessesReachedException>();
+                .Throw<MaxCapacityOfProcessesReachedException>();
 
             taskManager
-                .List().Should().BeEmpty();
+                .List().Should().Contain(existing)
+                .And
+                .NotContain(processToAdd);
         }
 
         [Fact]

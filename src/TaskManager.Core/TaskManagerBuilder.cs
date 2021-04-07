@@ -1,11 +1,11 @@
-﻿using TaskManager.Core.Abstractions;
+﻿using TaskManager.Core.Behaviors;
 
 namespace TaskManager.Core
 {
     public class TaskManagerBuilder
     {
         private readonly int _maxCapacity;
-        private ITaskManagerBehavior _behavior;
+        private Behavior _behavior;
 
         public TaskManagerBuilder(int maxCapacity)
         {
@@ -13,9 +13,12 @@ namespace TaskManager.Core
         }
 
         public TaskManagerBuilder With<TBehavior>()
-            where TBehavior : ITaskManagerBehavior, new()
+            where TBehavior : Behavior, new()
         {
-            _behavior = new TBehavior();
+            _behavior = new TBehavior
+            {
+                MaxCapacity = _maxCapacity
+            };
 
             return this;
         }
@@ -23,7 +26,6 @@ namespace TaskManager.Core
         public TaskManager Build()
         {
             return new(
-                _maxCapacity,
                 _behavior);
         }
     }

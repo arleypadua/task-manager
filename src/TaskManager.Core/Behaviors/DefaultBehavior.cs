@@ -1,18 +1,37 @@
-﻿using System.Collections.Generic;
-using TaskManager.Core.Abstractions;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using TaskManager.Core.Exceptions;
 
 namespace TaskManager.Core.Behaviors
 {
-    public class DefaultBehavior : ITaskManagerBehavior
+    public class DefaultBehavior : Behavior
     {
+        private readonly ConcurrentDictionary<ProcessIdentifier, Process> _processes;
+
         public DefaultBehavior()
         {
+            _processes = new ConcurrentDictionary<ProcessIdentifier, Process>();
         }
-        
-        public IEnumerable<Process> Processes { get; }
-        public void TryToAdd(Process process)
+
+        internal override IEnumerable<Process> GetProcesses() => _processes.Values;
+
+        internal override void TryToAdd(Process process)
         {
-            throw new System.NotImplementedException();
+            if (_processes.Count >= MaxCapacity)
+                throw new MaxCapacityOfProcessesReachedException(MaxCapacity, process.Id);
+
+            var added = _processes.TryAdd(process.Id, process);
+            if (!added) return;
+
+            process.ProcessKilled += HandleProcessKilled;
+        }
+
+        private void HandleProcessKilled(Process process)
+        {
+            if (_processes.TryRemove(process.Id, out var removed))
+            {
+                removed.ProcessKilled -= HandleProcessKilled;
+            }
         }
     }
 }
