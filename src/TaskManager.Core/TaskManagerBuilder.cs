@@ -20,6 +20,13 @@ namespace TaskManager.Core
             return this;
         }
 
+        public TaskManagerBuilder With(string behavior)
+        {
+            _behavior = BehaviorFactory.CreateFor(behavior, _maxCapacity);
+
+            return this;
+        }
+
         public TaskManager Build()
         {
             return new(
