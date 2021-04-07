@@ -4,8 +4,14 @@ namespace TaskManager.Core.Behaviors
 {
     public class PriorityBehavior : Behavior
     {
-        public PriorityBehavior()
+        private PriorityBehavior(int maxCapacity)
+            : base(maxCapacity)
         {
+        }
+
+        public static PriorityBehavior Create(int maxCapacity)
+        {
+            return new(maxCapacity);
         }
 
         internal override IEnumerable<Process> GetProcesses()
@@ -13,7 +19,7 @@ namespace TaskManager.Core.Behaviors
             throw new System.NotImplementedException();
         }
 
-        internal override void TryToAdd(Process process)
+        internal override bool TryToAdd(Process process)
         {
             throw new System.NotImplementedException();
         }

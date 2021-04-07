@@ -1,22 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TaskManager.Core.Behaviors
 {
     public abstract class Behavior
     {
-        private readonly int _maxCapacity;
-
-        public int MaxCapacity
+        private Behavior()
         {
-            get => _maxCapacity;
-            internal init =>
-                _maxCapacity = value <= 0
-                    ? throw new ArgumentException("Max capacity cannot be 0 or less", nameof(value))
-                    : value;
+        }
+        
+        protected Behavior(int maxCapacity)
+        {
+            MaxCapacity = maxCapacity <= 0
+                ? throw new ArgumentException("Max capacity cannot be 0 or less", nameof(maxCapacity))
+                : maxCapacity;
         }
 
+        public int MaxCapacity { get; }
+        
         internal abstract IEnumerable<Process> GetProcesses();
-        internal abstract void TryToAdd(Process process);
+        internal abstract bool TryToAdd(Process process);
+
+        protected bool MaxCapacityReached => GetProcesses().Count() >= MaxCapacity;
     }
 }

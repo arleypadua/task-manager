@@ -13,12 +13,9 @@ namespace TaskManager.Core
         }
 
         public TaskManagerBuilder With<TBehavior>()
-            where TBehavior : Behavior, new()
+            where TBehavior : Behavior
         {
-            _behavior = new TBehavior
-            {
-                MaxCapacity = _maxCapacity
-            };
+            _behavior = BehaviorFactory.CreateFor<TBehavior>(_maxCapacity);
 
             return this;
         }

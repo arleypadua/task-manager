@@ -8,22 +8,28 @@ namespace TaskManager.Core.Behaviors
     {
         private readonly ConcurrentDictionary<ProcessIdentifier, Process> _processes;
 
-        public DefaultBehavior()
+        private DefaultBehavior(int maxCapacity)
+            : base(maxCapacity)
         {
             _processes = new ConcurrentDictionary<ProcessIdentifier, Process>();
         }
 
+        public static DefaultBehavior Create(int maxCapacity)
+        {
+            return new(maxCapacity);
+        }
+
         internal override IEnumerable<Process> GetProcesses() => _processes.Values;
 
-        internal override void TryToAdd(Process process)
+        internal override bool TryToAdd(Process process)
         {
-            if (_processes.Count >= MaxCapacity)
+            if (MaxCapacityReached)
                 throw new MaxCapacityOfProcessesReachedException(MaxCapacity, process.Id);
 
             var added = _processes.TryAdd(process.Id, process);
-            if (!added) return;
+            if (added) process.ProcessKilled += HandleProcessKilled;
 
-            process.ProcessKilled += HandleProcessKilled;
+            return added;
         }
 
         private void HandleProcessKilled(Process process)
