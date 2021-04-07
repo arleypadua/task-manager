@@ -29,7 +29,7 @@ namespace TaskManager.Core.Behaviors
             {
                 _processes.Last().Value.Kill();
 
-                // recursively try to add a process, so that eventually are able to enqueue the process
+                // recursively try to add a process, so that eventually we are able to enqueue the process
                 return TryToAdd(process);
             }
 

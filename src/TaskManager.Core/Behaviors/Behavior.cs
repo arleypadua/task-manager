@@ -17,11 +17,10 @@ namespace TaskManager.Core.Behaviors
                 : maxCapacity;
         }
 
-        public int MaxCapacity { get; }
+        protected int MaxCapacity { get; }
+        protected bool MaxCapacityReached => GetProcesses().Count() >= MaxCapacity;
         
         internal abstract IEnumerable<Process> GetProcesses();
         internal abstract bool TryToAdd(Process process);
-
-        protected bool MaxCapacityReached => GetProcesses().Count() >= MaxCapacity;
     }
 }
