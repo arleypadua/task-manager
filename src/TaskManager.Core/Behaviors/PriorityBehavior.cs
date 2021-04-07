@@ -35,7 +35,7 @@ namespace TaskManager.Core.Behaviors
 
                 // when no buckets with less priority are available, we don't add the process
                 if (!leastPriorityBuckets.Any()) return false;
-                
+
                 var leastPriorityBucket = leastPriorityBuckets.Last();
 
                 leastPriorityBucket
@@ -44,12 +44,12 @@ namespace TaskManager.Core.Behaviors
                     .Select(v => v.Value)
                     .Last()
                     .Kill();
-                    
+
                 return TryToAdd(process);
             }
 
             var added = priorityBucket.TryAdd(process.Id, process);
-            if (added) process.ProcessKilled += HandleProcessKilled;
+            if (added) SubscribeToProcessKilledOn(process);
 
             return added;
         }
@@ -59,12 +59,12 @@ namespace TaskManager.Core.Behaviors
             return _processes.GetOrAdd(process.Id.Priority, new ConcurrentDictionary<ProcessIdentifier, Process>());
         }
 
-        private void HandleProcessKilled(Process process)
+        protected override void HandleProcessKilled(Process process)
         {
             var priorityBucket = GetOrCreatePriorityBucket(process);
             if (priorityBucket.TryRemove(process.Id, out var removed))
             {
-                removed.ProcessKilled -= HandleProcessKilled;
+                UnsubscribeToProcessKilledOn(removed);
             }
         }
     }

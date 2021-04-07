@@ -22,5 +22,16 @@ namespace TaskManager.Core.Behaviors
         
         internal abstract IEnumerable<Process> GetProcesses();
         internal abstract bool TryToAdd(Process process);
+        protected abstract void HandleProcessKilled(Process process);
+
+        protected void SubscribeToProcessKilledOn(Process process)
+        {
+            process.ProcessKilled += HandleProcessKilled;
+        }
+        
+        protected void UnsubscribeToProcessKilledOn(Process process)
+        {
+            process.ProcessKilled -= HandleProcessKilled;
+        }
     }
 }

@@ -27,16 +27,16 @@ namespace TaskManager.Core.Behaviors
                 throw new MaxCapacityOfProcessesReachedException(MaxCapacity, process.Id);
 
             var added = _processes.TryAdd(process.Id, process);
-            if (added) process.ProcessKilled += HandleProcessKilled;
+            if (added) SubscribeToProcessKilledOn(process);
 
             return added;
         }
 
-        private void HandleProcessKilled(Process process)
+        protected override void HandleProcessKilled(Process process)
         {
             if (_processes.TryRemove(process.Id, out var removed))
             {
-                removed.ProcessKilled -= HandleProcessKilled;
+                UnsubscribeToProcessKilledOn(process);
             }
         }
     }
