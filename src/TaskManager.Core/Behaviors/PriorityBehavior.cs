@@ -6,7 +6,7 @@ namespace TaskManager.Core.Behaviors
 {
     public class PriorityBehavior : Behavior
     {
-        private readonly ConcurrentDictionary<int, ConcurrentDictionary<ProcessIdentifier, Process>> _processes;
+        private readonly ConcurrentDictionary<int, ConcurrentDictionary<int, Process>> _processes;
 
         private PriorityBehavior(int maxCapacity)
             : base(maxCapacity)
@@ -21,6 +21,12 @@ namespace TaskManager.Core.Behaviors
 
         internal override IEnumerable<Process> GetProcesses() => _processes
             .SelectMany(p => p.Value.Values);
+
+        internal override Process GetProcessByPid(int pid)
+        {
+            return GetProcesses()
+                .FirstOrDefault(p => p.Id.PID == pid);
+        }
 
         internal override bool TryToAdd(Process process)
         {
@@ -48,21 +54,21 @@ namespace TaskManager.Core.Behaviors
                 return TryToAdd(process);
             }
 
-            var added = priorityBucket.TryAdd(process.Id, process);
+            var added = priorityBucket.TryAdd(process.Id.PID, process);
             if (added) SubscribeToProcessKilledOn(process);
 
             return added;
         }
 
-        private ConcurrentDictionary<ProcessIdentifier, Process> GetOrCreatePriorityBucket(Process process)
+        private ConcurrentDictionary<int, Process> GetOrCreatePriorityBucket(Process process)
         {
-            return _processes.GetOrAdd(process.Id.Priority, new ConcurrentDictionary<ProcessIdentifier, Process>());
+            return _processes.GetOrAdd(process.Id.Priority, new ConcurrentDictionary<int, Process>());
         }
 
         protected override void HandleProcessKilled(Process process)
         {
             var priorityBucket = GetOrCreatePriorityBucket(process);
-            if (priorityBucket.TryRemove(process.Id, out var removed))
+            if (priorityBucket.TryRemove(process.Id.PID, out var removed))
             {
                 UnsubscribeToProcessKilledOn(removed);
             }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using TaskManager.Core.Exceptions;
 
 namespace TaskManager.Api.Filters
 {
@@ -10,7 +11,8 @@ namespace TaskManager.Api.Filters
         private static readonly Dictionary<Type, Func<ExceptionContext, IActionResult>> _exceptionMapping = new()
         {
             {typeof(InvalidOperationException), BadRequest},
-            {typeof(ArgumentException), BadRequest}
+            {typeof(ArgumentException), BadRequest},
+            {typeof(MaxCapacityOfProcessesReachedException), BadRequest}
         };
 
         public void OnException(ExceptionContext context)

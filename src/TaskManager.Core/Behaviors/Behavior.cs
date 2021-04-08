@@ -21,6 +21,7 @@ namespace TaskManager.Core.Behaviors
         protected bool MaxCapacityReached => GetProcesses().Count() >= MaxCapacity;
         
         internal abstract IEnumerable<Process> GetProcesses();
+        internal abstract Process GetProcessByPid(int pid);
         internal abstract bool TryToAdd(Process process);
         protected abstract void HandleProcessKilled(Process process);
 

@@ -33,8 +33,7 @@ namespace TaskManager.Core
         public void Kill(int pid)
         {
             _taskManagerBehavior
-                .GetProcesses()
-                .SingleOrDefault(p => p.Id.PID == pid)?
+                .GetProcessByPid(pid)?
                 .Kill();
         }
 
