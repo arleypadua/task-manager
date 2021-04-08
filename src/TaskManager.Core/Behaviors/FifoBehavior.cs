@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using TaskManager.Core.Extensions;
 
 namespace TaskManager.Core.Behaviors
 {
@@ -23,7 +24,7 @@ namespace TaskManager.Core.Behaviors
         }
 
         internal override IEnumerable<Process> GetProcesses() => _processes.Values;
-        
+
         internal override Process GetProcessByPid(int pid)
         {
             return _processes.TryGetValue(pid, out var process)
@@ -33,6 +34,9 @@ namespace TaskManager.Core.Behaviors
 
         internal override bool TryToAdd(Process process)
         {
+            if (_processes.ContainsKey(process.Id.PID))
+                return false;
+            
             if (MaxCapacityReached)
             {
                 _processes.First().Value.Kill();
@@ -41,10 +45,14 @@ namespace TaskManager.Core.Behaviors
                 return TryToAdd(process);
             }
 
-            var added = _processes.TryAdd(process.Id.PID, process);
-            if (added) SubscribeToProcessKilledOn(process);
+            _processes.AddOrIgnoreWhenExisting(process.Id.PID,
+                addValueFactory: _ =>
+                {
+                    SubscribeToProcessKilledOn(process);
+                    return process;
+                });
 
-            return added;
+            return true;
         }
 
         protected override void HandleProcessKilled(Process process)

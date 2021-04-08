@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using TaskManager.Core.Exceptions;
+using TaskManager.Core.Extensions;
 
 namespace TaskManager.Core.Behaviors
 {
@@ -30,13 +31,20 @@ namespace TaskManager.Core.Behaviors
 
         internal override bool TryToAdd(Process process)
         {
+            if (_processes.ContainsKey(process.Id.PID))
+                return false;
+            
             if (MaxCapacityReached)
                 throw new MaxCapacityOfProcessesReachedException(MaxCapacity, process.Id);
 
-            var added = _processes.TryAdd(process.Id.PID, process);
-            if (added) SubscribeToProcessKilledOn(process);
+            _processes.AddOrIgnoreWhenExisting(process.Id.PID,
+                addValueFactory: _ =>
+                {
+                    SubscribeToProcessKilledOn(process);
+                    return process;
+                });
 
-            return added;
+            return true;
         }
 
         protected override void HandleProcessKilled(Process process)

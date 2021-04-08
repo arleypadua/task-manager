@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using TaskManager.Core.Extensions;
 
 namespace TaskManager.Core.Behaviors
 {
@@ -31,6 +32,8 @@ namespace TaskManager.Core.Behaviors
         internal override bool TryToAdd(Process process)
         {
             var priorityBucket = GetOrCreatePriorityBucket(process);
+            if (priorityBucket.ContainsKey(process.Id.PID))
+                return false;
 
             if (MaxCapacityReached)
             {
@@ -54,10 +57,14 @@ namespace TaskManager.Core.Behaviors
                 return TryToAdd(process);
             }
 
-            var added = priorityBucket.TryAdd(process.Id.PID, process);
-            if (added) SubscribeToProcessKilledOn(process);
+            priorityBucket.AddOrIgnoreWhenExisting(process.Id.PID,
+                addValueFactory: _ =>
+                {
+                    SubscribeToProcessKilledOn(process);
+                    return process;
+                });
 
-            return added;
+            return true;
         }
 
         private ConcurrentDictionary<int, Process> GetOrCreatePriorityBucket(Process process)
