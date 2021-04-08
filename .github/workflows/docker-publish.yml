@@ -82,4 +82,4 @@ jobs:
           app-name: task-manager-arley
           slot-name: production
           publish-profile: ${{ secrets.PRODUCTION_PUBLISH_PROFILE }}
-          images: 'docker.pkg.github.com/arleypadua/task-manager/task-manager:latest'
+          images: 'docker.pkg.github.com/arleypadua/task-manager/task-manager'
