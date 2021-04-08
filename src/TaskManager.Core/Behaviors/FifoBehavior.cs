@@ -35,7 +35,7 @@ namespace TaskManager.Core.Behaviors
         {
             if (MaxCapacityReached)
             {
-                _processes.Last().Value.Kill();
+                _processes.First().Value.Kill();
 
                 // recursively try to add a process, so that eventually we are able to enqueue the process
                 return TryToAdd(process);
