@@ -15,13 +15,7 @@ namespace TaskManager.Core
 
         public static Behavior CreateFor<TBehavior>(int maxCapacity)
         {
-            if (!_factories.TryGetValue(typeof(TBehavior).Name, out var behavior))
-            {
-                throw new InvalidOperationException($"Factory for {typeof(TBehavior).Name} does not exist. " +
-                                                    $"Please choose one existing: {string.Join(", ", _factories.Keys)}");
-            }
-
-            return behavior.Invoke(maxCapacity);
+            return CreateFor(typeof(TBehavior).Name, maxCapacity);
         }
 
         public static Behavior CreateFor(string behaviorName, int maxCapacity)
