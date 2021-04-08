@@ -51,7 +51,7 @@ namespace TaskManager.Core.Behaviors
                     .Value
                     .OrderBy(d => d.Value.StartedAtUtc)
                     .Select(v => v.Value)
-                    .Last()
+                    .First()
                     .Kill();
 
                 return TryToAdd(process);
